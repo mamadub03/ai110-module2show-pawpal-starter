@@ -45,6 +45,8 @@ Objects:
 - Describe one tradeoff your scheduler makes.
 - Why is that tradeoff reasonable for this scenario?
 
+    One tradeoff is that the scheduler conflict check is currently written to detect overlapping task windows in a lightweight way. It is not yet doing full calendar available-slot computation (e.g., splitting tasks around partial overlaps or handling buffer times between tasks). That choice keeps the code simpler and easier to read, while still warning users when two tasks are clearly in the same time window.
+
 ---
 
 ## 3. AI Collaboration

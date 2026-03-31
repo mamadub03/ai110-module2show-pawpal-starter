@@ -25,6 +25,28 @@ class Owner:
             tasks.extend(pet.tasks)
         return tasks
 
+    def filter_tasks(self, done: Optional[bool] = None, pet_name: Optional[str] = None) -> List[Task]:
+        """Filter tasks by completion status and/or pet name.
+
+        - done=None: include all tasks
+        - done=True: include only completed tasks
+        - done=False: include only incomplete tasks
+        - pet_name=None: include tasks from all pets
+        - pet_name provided: include tasks only from the matching pet name
+        """
+        filtered_tasks: List[Task] = []
+
+        for pet in self.pets:
+            if pet_name is not None and pet.name != pet_name:
+                continue
+
+            for task in pet.tasks:
+                if done is not None and task.done != done:
+                    continue
+                filtered_tasks.append(task)
+
+        return filtered_tasks
+
 
 @dataclass
 class Task:
@@ -35,6 +57,7 @@ class Task:
     category: Optional[str] = None
     is_required: bool = True
     preferred_time: Optional[str] = None
+    recurrence: Optional[str] = None  # allowed: 'daily', 'weekly', or None
     done: bool = False
 
     def as_dict(self) -> Dict[str, object]:
@@ -47,6 +70,7 @@ class Task:
             "category": self.category,
             "is_required": self.is_required,
             "preferred_time": self.preferred_time,
+            "recurrence": self.recurrence,
             "done": self.done,
         }
 
@@ -64,9 +88,38 @@ class Task:
         if preferred_time is not None:
             self.preferred_time = preferred_time
 
-    def mark_done(self) -> None:
-        """Mark the task as completed."""
+    def mark_done(self, pet: Optional[Pet] = None) -> Optional[Task]:
+        """Mark the task as completed.
+
+        If the task is a recurring task (daily or weekly) and a pet is supplied,
+        automatically create a new Task instance for the next occurrence and add it
+        to the pet's task list.
+
+        Args:
+            pet: The Pet owner of this task; required for creating a recurring next task.
+
+        Returns:
+            The created next recurring Task, or None if no recurrence is set.
+        """
         self.done = True
+
+        if self.recurrence and pet is not None and self.recurrence in {"daily", "weekly"}:
+            next_id = f"{self.id}-next"
+            next_task = Task(
+                id=next_id,
+                name=self.name,
+                duration_minutes=self.duration_minutes,
+                priority=self.priority,
+                category=self.category,
+                is_required=self.is_required,
+                preferred_time=self.preferred_time,
+                recurrence=self.recurrence,
+                done=False,
+            )
+            pet.add_task(next_task)
+            return next_task
+
+        return None
 
 
 @dataclass
@@ -191,8 +244,9 @@ class Constraints:
 @dataclass
 class ScheduleEntry:
     task: Task
-    start_time: Optional[str] = None
-    end_time: Optional[str] = None
+    pet_name: Optional[str] = None
+    start_time: Optional[int] = None  # minutes since midnight
+    end_time: Optional[int] = None
 
 
 @dataclass
@@ -258,6 +312,40 @@ class Scheduler:
             f"and {schedule.total_duration} total minutes."
         )
         return schedule
+
+    def detect_conflicts(self, schedule: Schedule) -> List[str]:
+        """Detect schedule conflicts for overlapping task time ranges.
+
+        The method assumes schedule entries have explicit `start_time` and `end_time`
+        in minutes since midnight. It sorts interval entries by start time and
+        reports overlaps as warnings rather than raising exceptions.
+
+        Args:
+            schedule: The Schedule containing schedule entries to check.
+
+        Returns:
+            A list of warning messages for detected conflicts. Empty if no overlap.
+        """
+        warnings: List[str] = []
+
+        entries = [e for e in schedule.scheduled_tasks if e.start_time is not None and e.end_time is not None]
+        entries.sort(key=lambda e: e.start_time)
+
+        for i in range(len(entries)):
+            a = entries[i]
+            for j in range(i + 1, len(entries)):
+                b = entries[j]
+                if a.end_time <= b.start_time:
+                    break
+                # overlapping interval
+                owner_a = a.pet_name or "unknown pet"
+                owner_b = b.pet_name or "unknown pet"
+                warnings.append(
+                    f"Conflict: {a.task.name} (pet={owner_a}, {a.start_time}-{a.end_time}) "
+                    f"overlaps with {b.task.name} (pet={owner_b}, {b.start_time}-{b.end_time})."
+                )
+
+        return warnings
 
     def prioritize(self, tasks: List[Task]) -> List[Task]:
         """Sort tasks by completion, requirement, priority, and duration."""
