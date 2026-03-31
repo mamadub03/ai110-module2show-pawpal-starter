@@ -4,6 +4,20 @@
 
 - Some of the main core actions the user should be able to perform are: add/remove tasks, create a schedule based off preferences and allow for edits, new tasks for sperate pets
 
+Objects:
+- Pet:
+    Attributes = name, owner, color, height, weight
+    Methods = take_walk(), give_medicine(), put_sleep(), serve_food(), groom_pet(), go_exercise()
+- Task
+    Attributes = name, length, preference
+    Methods = remove_task, add_task, update_task, update_task_info()
+- Constraints
+    Attributes = time_available, prioritiy, preferences
+    Methods = grabber methods
+- Plan
+    Attributes = plan description
+    Methods = edit_plan(), explain_plan() 
+
 **a. Initial design**
 
 - Briefly describe your initial UML design.
