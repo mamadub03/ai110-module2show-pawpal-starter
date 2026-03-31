@@ -4,6 +4,12 @@
 
 - Some of the main core actions the user should be able to perform are: add/remove tasks, create a schedule based off preferences and allow for edits, new tasks for sperate pets
 
+
+**a. Initial design**
+
+- Briefly describe your initial UML design.
+- What classes did you include, and what responsibilities did you assign to each?
+Here is a brief overview of my UML design, classes, and responsibilities
 Objects:
 - Pet:
     Attributes = name, owner, color, height, weight
@@ -18,15 +24,12 @@ Objects:
     Attributes = plan description
     Methods = edit_plan(), explain_plan() 
 
-**a. Initial design**
-
-- Briefly describe your initial UML design.
-- What classes did you include, and what responsibilities did you assign to each?
-
 **b. Design changes**
 
 - Did your design change during implementation?
 - If yes, describe at least one change and why you made it.
+
+    Yes I made changes to the skeletons... for example I added a new class for Owner so there could be multiple owners for different pets.
 
 ---
 
