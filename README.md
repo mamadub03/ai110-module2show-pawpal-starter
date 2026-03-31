@@ -52,3 +52,20 @@ The updated system includes:
 - lightweight warnings instead of crashes when scheduling conflicts are found
 
 These additions make the app more robust, easier to test, and clearer about why a plan was chosen.
+
+## Testing PawPal+
+
+Run tests:
+
+```bash
+python -m pytest
+```
+
+Coverage in this test suite:
+
+- task state transitions, including completion and recurrence handling
+- owner-level filtering by completion status and per-pet task selection
+- scheduler ordering behavior and schedule build logic
+- conflict detection for overlapping or duplicate task times
+
+Confidence level: ⭐⭐⭐⭐⭐ (5/5) based on successful test execution with no failures.

@@ -1,5 +1,5 @@
 import pytest
-from pawpal_system import Pet, Owner, Task, Schedule, ScheduleEntry
+from pawpal_system import Pet, Owner, Task, Schedule, ScheduleEntry, Scheduler
 
 
 def test_task_completion_marks_done():
@@ -60,6 +60,48 @@ def test_scheduler_detects_time_conflict():
     schedule = Schedule()
     schedule.scheduled_tasks.append(ScheduleEntry(task=task_dog, pet_name=dog.name, start_time=540, end_time=570))
     schedule.scheduled_tasks.append(ScheduleEntry(task=task_cat, pet_name=cat.name, start_time=540, end_time=560))
+
+    scheduler = Scheduler()
+    warnings = scheduler.detect_conflicts(schedule)
+
+    assert len(warnings) == 1
+    assert "overlaps" in warnings[0]
+
+
+def test_scheduler_detects_conflicts_with_unsorted_task_times():
+    owner = Owner(name="Alex", available_minutes=240)
+    dog = Pet(name="Buddy", owner=owner, species="Dog", age=4, weight=15.0)
+    owner.add_pet(dog)
+
+    task_early = Task(id="t1", name="Brush", duration_minutes=10, priority=1)
+    task_late = Task(id="t2", name="Play", duration_minutes=20, priority=1)
+    dog.add_task(task_early)
+    dog.add_task(task_late)
+
+    schedule = Schedule()
+    # Added in reverse chronological order to ensure detect_conflicts sorts internally.
+    schedule.scheduled_tasks.append(ScheduleEntry(task=task_late, pet_name=dog.name, start_time=600, end_time=620))
+    schedule.scheduled_tasks.append(ScheduleEntry(task=task_early, pet_name=dog.name, start_time=540, end_time=560))
+
+    scheduler = Scheduler()
+    warnings = scheduler.detect_conflicts(schedule)
+
+    assert warnings == []
+
+
+def test_scheduler_conflicts_for_duplicate_times():
+    owner = Owner(name="Alex", available_minutes=240)
+    dog = Pet(name="Buddy", owner=owner, species="Dog", age=4, weight=15.0)
+    owner.add_pet(dog)
+
+    task_a = Task(id="t3", name="Walk", duration_minutes=30, priority=1)
+    task_b = Task(id="t4", name="Fetch", duration_minutes=30, priority=1)
+    dog.add_task(task_a)
+    dog.add_task(task_b)
+
+    schedule = Schedule()
+    schedule.scheduled_tasks.append(ScheduleEntry(task=task_a, pet_name=dog.name, start_time=600, end_time=630))
+    schedule.scheduled_tasks.append(ScheduleEntry(task=task_b, pet_name=dog.name, start_time=600, end_time=630))
 
     scheduler = Scheduler()
     warnings = scheduler.detect_conflicts(schedule)
