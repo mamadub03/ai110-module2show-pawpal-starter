@@ -53,13 +53,24 @@ Objects:
 
 **a. How you used AI**
 
-- How did you use AI tools during this project (for example: design brainstorming, debugging, refactoring)?
-- What kinds of prompts or questions were most helpful?
+- I used Copilot to review class designs (Owner, Pet, Task, Constraints, Schedule, Scheduler), write concise method logic, and debug behavior with read_file + test-driven updates.
+- Most helpful prompts were defect reports like "utf-8 codec can't decode" and "update UML diagram based on final implementation".
 
 **b. Judgment and verification**
 
-- Describe one moment where you did not accept an AI suggestion as-is.
-- How did you evaluate or verify what the AI suggested?
+- Copilot suggested using raw glyphs `"���"` in `app.py` for emojis; I rejected that and replaced with valid UTF-8 `"🐾"` and an explicit encoding header.
+- I verified by reading the file content and running the app in Streamlit after a code fix.
+
+**c. Specific Copilot features**
+
+- Context-aware code completion (suggesting methods and class fields).
+- Quick code scanning and system-level architecture explanation from existing module content.
+- Assisted in structured README/reflection updates.
+
+**d. Separate chat sessions benefit**
+
+- Breaking design, code fix, and reflection into separate prompts kept focus and reduced confusion.
+- I could lock in working logic before writing the final reflective narrative.
 
 ---
 
@@ -67,13 +78,17 @@ Objects:
 
 **a. What you tested**
 
-- What behaviors did you test?
-- Why were these tests important?
+- Verified `Task.mark_done()` sets `done=True` and creates a new recurring task when `recurrence` is `daily` or `weekly`.
+- Verified `Owner.filter_tasks(done, pet_name)` selects correct tasks by status and pet.
+- Verified `Scheduler.prioritize()` orders incomplete required high-priority short tasks first.
+- Verified `Scheduler.detect_conflicts()` returns warnings for overlapping entries when explicit start/end times exist.
+
+These tests are important because they guard core scheduling behavior and prevent regressions when adjusting task or plan logic.
 
 **b. Confidence**
 
-- How confident are you that your scheduler works correctly?
-- What edge cases would you test next if you had more time?
+- I am fairly confident (~4/5) that the scheduler handles typical use cases correctly. The logic is straightforward and covered by targeted tests, but complex savings (calendar scheduling, buffer times, multi-day planning) are not yet implemented.
+- If I had more time, I would add tests for: overlapping tasks with unsorted start times, block-period-aware constraint filtering, `max_tasks` boundary conditions, and owner preference-based filtering.
 
 ---
 
@@ -81,12 +96,14 @@ Objects:
 
 **a. What went well**
 
-- What part of this project are you most satisfied with?
+- I’m most satisfied that the implementation supported the full workflow from owner/pet/task modeling to schedule generation and explanation with conflict detection.
+- The system is modular: data objects are separated from scheduling strategies, which makes testing and extension easier.
 
 **b. What you would improve**
 
-- If you had another iteration, what would you improve or redesign?
+- Next iteration would add explicit `Task` time windows, better conflict resolution (not just detection), and a UI workflow for editing/removing tasks in the schedule.
+- I would also implement persistence (save/load owner state) and multi-owner support clearly in the UI.
 
 **c. Key takeaway**
 
-- What is one important thing you learned about designing systems or working with AI on this project?
+- Leading architecture with AI support means setting clear structure and accepting suggestions carefully, not automatically. AI is strongest as a collaborator for small refactors and code patterns, while the lead architect ensures correctness, simplicity, and alignment with requirements.

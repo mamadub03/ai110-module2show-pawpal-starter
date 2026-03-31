@@ -1,9 +1,10 @@
+# -*- coding: utf-8 -*-
 import streamlit as st
 from pawpal_system import Owner, Pet, Task, Constraints, Scheduler
 
-st.set_page_config(page_title="PawPal+", page_icon="í°¾", layout="centered")
+st.set_page_config(page_title="PawPal+", page_icon="ğŸ¾", layout="centered")
 
-st.title("í°¾ PawPal+")
+st.title("ğŸ¾ PawPal+")
 
 st.markdown(
     """
